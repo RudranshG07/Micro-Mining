@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacks Mining-as-a-DePIN Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    <style>
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .mining-animation {
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+        @keyframes pulse {
+            from {
+                opacity: 0.6;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                ⚡ Stacks Mining-as-a-DePIN
+            </h1>
+            <p class="text-xl text-blue-100 mb-6">
+                Democratizing blockchain mining with small devices and fair participation
+            </p>
+            
+            <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 inline-block glassmorphism">
+                <p class="text-white font-semibold">
+                    Demo Mode - Simulating Real Blockchain Interactions
+                </p>
+            </div>
+        </div>
+
+        <!-- Live Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glassmorphism rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-200 text-sm">Total Miners</p>
+                        <p class="text-white text-2xl font-bold" id="totalMiners">0</p>
+                    </div>
+                    <span class="text-blue-400 text-3xl">👥</span>
+                </div>
+            </div>
+
+            <div class="glassmorphism rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-200 text-sm">Current Round</p>
+                        <p class="text-white text-2xl font-bold" id="currentRound">1</p>
+                    </div>
+                    <span class="text-green-400 text-3xl">🕒</span>
+                </div>
+            </div>
+
+            <div class="glassmorphism rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-200 text-sm">Total Rewards</p>
+                        <p class="text-white text-2xl font-bold" id="totalRewards">0.00 STX</p>
+                    </div>
+                    <span class="text-purple-400 text-3xl">🏆</span>
+                </div>
+            </div>
+
+            <div class="glassmorphism rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-yellow-200 text-sm">Mining Status</p>
+                        <p class="text-white text-lg font-bold" id="miningStatus">Ready</p>
+                    </div>
+                    <span class="text-yellow-400 text-3xl mining-animation">⚡</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Device Registration -->
+            <div class="glassmorphism rounded-xl p-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="text-blue-400">💻</span>
+                    Device Registration
+                </h3>
+                
+                <div id="registrationSection" class="space-y-4">
+                    <div>
+                        <label class="block text-blue-200 text-sm mb-2">
+                            Device ID (Phone, Laptop, etc.)
+                        </label>
+                        <input
+                            type="text"
+                            id="deviceId"
+                            placeholder="e.g., iPhone-13-Pro, MacBook-M1, RaspberryPi-4"
+                            class="w-full px-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:border-blue-400"
+                        />
+                    </div>
+                    <button
+                        onclick="registerDevice()"
+                        id="registerBtn"
+                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105"
+                    >
+                        Register as Miner (1 STX)
+                    </button>
+                </div>
+
+                <div id="registeredSection" class="hidden text-center py-4">
+                    <div class="text-green-400 font-bold text-lg">✓ Device Registered!</div>
+                    <p class="text-blue-200 mt-2" id="registeredDevice"></p>
+                    <p class="text-blue-200" id="roundsParticipated">Rounds Participated: 0</p>
+                </div>
+            </div>
+
+            <!-- Mining Commitment -->
+            <div class="glassmorphism rounded-xl p-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="text-yellow-400">⚡</span>
+                    Mining Commitment
+                </h3>
+                
+                <div id="miningSection" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-blue-200 text-sm mb-2">
+                            Commitment Amount (STX)
+                        </label>
+                        <input
+                            type="number"
+                            id="commitment"
+                            value="0.1"
+                            min="0.1"
+                            step="0.1"
+                            class="w-full px-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:border-yellow-400"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-blue-200 text-sm mb-2">
+                            Hash Effort (Simulated Work)
+                        </label>
+                        <div class="flex gap-2">
+                            <input
+                                type="text"
+                                id="hashEffort"
+                                placeholder="Generated hash from your device..."
+                                readonly
+                                class="flex-1 px-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:border-yellow-400"
+                            />
+                            <button
+                                onclick="generateHash()"
+                                class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-lg"
+                            >
+                                Generate
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button
+                        onclick="commitMining()"
+                        id="commitBtn"
+                        class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold py-3 rounded-lg transition-all transform hover:scale-105"
+                    >
+                        Commit Mining Effort
+                    </button>
+                </div>
+
+                <div id="miningPlaceholder" class="text-center py-8 text-blue-300">
+                    Register your device first to start mining
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Miners Feed -->
+        <div class="mt-8 glassmorphism rounded-xl p-6">
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span class="text-green-400">📊</span>
+                Live Mining Activity
+            </h3>
+            <div id="minersFeed" class="space-y-3 max-h-64 overflow-y-auto">
+                <p class="text-blue-300 text-center">No mining activity yet. Be the first miner!</p>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-8 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+            <h3 class="text-xl font-bold text-white mb-4">How It Works</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-blue-200">
+                <div class="text-center">
+                    <div class="bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-white font-bold">1</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">Register Device</h4>
+                    <p class="text-sm">Connect your phone, laptop, or IoT device to the DePIN network</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-yellow-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-black font-bold">2</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">Commit Effort</h4>
+                    <p class="text-sm">Submit computational work and stake STX to participate in mining</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-white font-bold">3</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">Win Rewards</h4>
+                    <p class="text-sm">Fair lottery selects winners who earn the entire reward pool</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Badge -->
+        <div class="fixed bottom-4 right-4 glassmorphism rounded-lg p-3">
+            <p class="text-white text-sm font-semibold">🎭 DEMO MODE</p>
+        </div>
+    </div>
+
+    <script>
+        // Demo state
+        let miners = [];
+        let totalRewards = 0;
+        let currentRound = 1;
+        let isRegistered = false;
+        let userDevice = '';
+        let userParticipation = 0;
+
+        function updateStats() {
+            document.getElementById('totalMiners').textContent = miners.length;
+            document.getElementById('currentRound').textContent = currentRound;
+            document.getElementById('totalRewards').textContent = totalRewards.toFixed(2) + ' STX';
+        }
+
+        function registerDevice() {
+            const deviceId = document.getElementById('deviceId').value;
+            if (!deviceId.trim()) {
+                alert('Please enter a device ID');
+                return;
+            }
+
+            userDevice = deviceId;
+            isRegistered = true;
+            
+            // Add to miners list
+            miners.push({
+                device: deviceId,
+                commitment: 0,
+                rounds: 0,
+                timestamp: new Date()
+            });
+
+            // Update UI
+            document.getElementById('registrationSection').classList.add('hidden');
+            document.getElementById('registeredSection').classList.remove('hidden');
+            document.getElementById('registeredDevice').textContent = 'Device: ' + deviceId;
+            document.getElementById('miningSection').classList.remove('hidden');
+            document.getElementById('miningPlaceholder').classList.add('hidden');
+            document.getElementById('miningStatus').textContent = 'Registered';
+
+            updateStats();
+            addToFeed(`🟢 New miner joined: ${deviceId}`);
+
+            // Auto-generate hash
+            generateHash();
+        }
+
+        function generateHash() {
+            const hash = 'hash_' + Math.random().toString(36).substring(2, 15) + 
+                        Math.random().toString(36).substring(2, 15);
+            document.getElementById('hashEffort').value = hash.padEnd(32, '0');
+        }
+
+        function commitMining() {
+            const commitment = parseFloat(document.getElementById('commitment').value);
+            const hashEffort = document.getElementById('hashEffort').value;
+            
+            if (!hashEffort) {
+                alert('Please generate a hash first');
+                return;
+            }
+
+            // Update user stats
+            userParticipation++;
+            totalRewards += commitment;
+            
+            // Update UI
+            document.getElementById('roundsParticipated').textContent = 
+                'Rounds Participated: ' + userParticipation;
+            document.getElementById('miningStatus').textContent = 'Mining Active';
+
+            updateStats();
+            addToFeed(`⚡ ${userDevice} committed ${commitment} STX for mining`);
+
+            // Simulate other miners joining
+            setTimeout(() => {
+                simulateActivity();
+            }, 2000);
+
+            // Auto-generate new hash for next round
+            setTimeout(generateHash, 1000);
+        }
+
+        function simulateActivity() {
+            const devices = [
+                'iPhone-14-Pro', 'MacBook-Air-M2', 'RaspberryPi-4B', 'Samsung-S23',
+                'ThinkPad-X1', 'iPad-Pro-11', 'Steam-Deck', 'Tesla-Model3'
+            ];
+            
+            const randomDevice = devices[Math.floor(Math.random() * devices.length)];
+            const randomCommitment = (0.1 + Math.random() * 0.4).toFixed(1);
+            
+            if (!miners.find(m => m.device === randomDevice)) {
+                miners.push({
+                    device: randomDevice,
+                    commitment: parseFloat(randomCommitment),
+                    rounds: 1,
+                    timestamp: new Date()
+                });
+
+                totalRewards += parseFloat(randomCommitment);
+                addToFeed(`🟢 New miner: ${randomDevice}`);
+                addToFeed(`⚡ ${randomDevice} committed ${randomCommitment} STX`);
+                
+                updateStats();
+            }
+
+            // Simulate round end and winner selection
+            if (miners.length >= 3 && Math.random() > 0.7) {
+                setTimeout(selectWinner, 3000);
+            }
+        }
+
+        function selectWinner() {
+            if (miners.length === 0) return;
+            
+            const winner = miners[Math.floor(Math.random() * miners.length)];
+            const reward = totalRewards;
+            
+            addToFeed(`🎉 ROUND ${currentRound} WINNER: ${winner.device} wins ${reward.toFixed(2)} STX!`);
+            
+            // Reset for next round
+            currentRound++;
+            totalRewards = 0;
+            updateStats();
+            
+            // Chance user wins
+            if (winner.device === userDevice) {
+                document.getElementById('miningStatus').textContent = '🏆 YOU WON!';
+                setTimeout(() => {
+                    document.getElementById('miningStatus').textContent = 'Ready for Next Round';
+                }, 5000);
+            }
+        }
+
+        function addToFeed(message) {
+            const feed = document.getElementById('minersFeed');
+            const feedItem = document.createElement('div');
+            feedItem.className = 'bg-white/5 rounded-lg p-3 border-l-4 border-blue-400';
+            feedItem.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-white">${message}</span>
+                    <span class="text-blue-300 text-xs">${new Date().toLocaleTimeString()}</span>
+                </div>
+            `;
+            
+            // Remove placeholder
+            if (feed.children[0]?.textContent.includes('No mining activity')) {
+                feed.innerHTML = '';
+            }
+            
+            feed.insertBefore(feedItem, feed.firstChild);
+            
+            // Keep only last 10 entries
+            while (feed.children.length > 10) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // Initialize demo with some activity
+        setTimeout(() => {
+            addToFeed('🚀 DePIN Mining Network is Live!');
+        }, 1000);
+
+        // Simulate network activity every 15-20 seconds
+        setInterval(() => {
+            if (Math.random() > 0.6) {
+                simulateActivity();
+            }
+        }, 15000 + Math.random() * 5000);
+    </script>
+</body>
+</html>
